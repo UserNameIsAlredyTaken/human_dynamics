@@ -26,6 +26,6 @@ src/external/AlphaPose
 
 
 demo_data
-demo_out
+demo_output/
 
 !demo_output/test_video_fxm
