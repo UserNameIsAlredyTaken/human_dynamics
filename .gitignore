@@ -7,6 +7,7 @@ logs*
 *.DS_Store
 *.pyc
 *.swp
+venv/
 
 notebooks/
 results/
@@ -26,6 +27,7 @@ src/external/AlphaPose
 
 
 demo_data
-demo_output/
-
+demo_output/*
 !demo_output/test_video_fxm
+demo_output/test_video_fxm/*
+!demo_output/test_video_fxm/example.gif
