@@ -1,13 +1,15 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+# from __future__ import absolute_import
+# from __future__ import division
+# from __future__ import print_function
 
 import os
-
-import deepdish as dd
-import ipdb
-import numpy as np
 import tensorflow as tf
+import deepdish as dd
+
+# import ipdb
+import numpy as np
+print('tensorflow and deepdish both imported')
 from tqdm import tqdm
 
 from src.evaluation.eval_util import update_dict_entries
@@ -20,13 +22,12 @@ from src.models import (
 from src.omega import OmegasPred
 from src.tf_smpl.batch_smpl import SMPL
 
-
 class Tester(object):
 
     def __init__(self, config, pretrained_resnet_path='', sequence_length=None):
         self.config = config
         self.load_path = config.load_path
-
+        print(config.load_path)
         # Config + path.
         if not config.load_path:
             raise Exception(
@@ -295,7 +296,7 @@ class Tester(object):
         images_batched = np.reshape(images_batched, (count, B, T, H, W, 3))
 
         results = {}
-
+        #results is the full frames results, pred is single frame result
         for images in tqdm(images_batched):
             pred = self.predict(
                 images,
@@ -304,6 +305,7 @@ class Tester(object):
 
         # Results are now (CxBxTx...). Should be (Nx...).
         new_results = {}
+        #k,v stands for key value
         for k, v in results.items():
             v = np.array(v)[:, :, margin : -margin]
             old_shape = v.shape[3:]

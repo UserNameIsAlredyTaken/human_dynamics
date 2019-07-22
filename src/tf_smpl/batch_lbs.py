@@ -161,7 +161,7 @@ def batch_global_rigid_transformation(Rs, Js, parent, rotate_base=False):
         Js = tf.expand_dims(Js, -1)
 
         def make_A(R, t, name=None):
-            # Rs is N x 3 x 3, ts is N x 3 x 1
+            # Rs is N x 3 x 3, ts is N x 3 x 1 , homo stands for homo coordinate, which is 4*4
             with tf.name_scope(name, "Make_A", [R, t]):
                 R_homo = tf.pad(R, [[0, 0], [0, 1], [0, 0]])
                 t_homo = tf.concat([t, tf.ones([N, 1, 1])], 1)

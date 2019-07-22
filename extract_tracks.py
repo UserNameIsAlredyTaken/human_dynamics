@@ -93,6 +93,7 @@ def run_alphapose(img_dir, out_dir):
 def run_poseflow(img_dir, out_dir):
     alphapose_json = osp.join(out_dir, 'alphapose-results.json')
     out_json = osp.join(out_dir, 'alphapose-results-forvis-tracked.json')
+    #out_json = osp.join(out_dir, 'alphapose-results-forvis.json')
     if osp.exists(out_json):
         print('Tracking: done!')
         return out_json

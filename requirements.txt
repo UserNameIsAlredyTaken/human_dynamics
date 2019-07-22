@@ -10,6 +10,7 @@ opencv-python==3.4.5.20
 scikit-image==0.15.0
 scipy==1.2.1
 tensorflow==1.8
-torch==0.4.0
+#torch==0.1.2
 torchvision==0.2.2
 tqdm==4.19.9
+#mkl-random 1.0.1 requires cython, which is not installed.

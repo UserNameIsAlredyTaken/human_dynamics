@@ -6,7 +6,7 @@ import os
 import subprocess
 
 import cv2
-import ipdb
+#import ipdb
 import matplotlib.pyplot as plt
 import numpy as np
 from skimage.io import imread

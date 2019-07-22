@@ -6,19 +6,22 @@ Sample Usage:
 python -m demo_video --out_dir demo_data/output
 python -m demo_video --out_dir demo_data/output270k --load_path models/hmmr_model.ckpt-2699068
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+# from __future__ import absolute_import
+# from __future__ import division
+# from __future__ import print_function
 
-from glob import glob
 import json
 import os.path as osp
 import pickle
 import re
+import sys
+from glob import glob
 
-from absl import flags
-import ipdb
+# import ipdb
+from typing import Union
+
 import numpy as np
+from absl import flags
 
 from extract_tracks import compute_tracks
 from src.config import get_config
@@ -156,7 +159,23 @@ def predict_on_tracks(model, img_dir, poseflow_path, output_path, track_id,
         output_path += '_{}'.format(track_id)
 
     mkdir(output_path)
+
+    # make dir to save joint rotation mat in json
+    import os
+    without = output_path.split(os.sep)[:-1] # without hmmr_output
+    if without.__len__() > 1:
+        print('length>1')
+        sys.exit(1)
+    else:
+        without = without[0]
+    myjson_dir = osp.join(without, 'rot_output')
+    myjson_path = osp.join(myjson_dir, 'rot_output.json')
+    mkdir(myjson_dir)
+
+    # george's revision
+
     pred_path = osp.join(output_path, 'hmmr_output.pkl')
+
     if osp.exists(pred_path):
         print('----------')
         print('Loading pre-computed prediction.')
@@ -174,13 +193,29 @@ def predict_on_tracks(model, img_dir, poseflow_path, output_path, track_id,
         with open(pred_path, 'wb') as f:
             print('Saving prediction results to', pred_path)
             pickle.dump(preds, f)
+    # get the poses
+    myposes = preds['poses']
+    mydict = {}
+    for i in range(0, myposes.shape[1]):
+        rotmat = myposes[0][i]
+        rotlist = list(np.reshape(rotmat, (1, -1))[0])
+        rotlist = [float(j) for j in rotlist]
+        dic_index = 'rot_'+"%02d" %i
+        mydict[dic_index] = rotlist
+
+    print('Saving rot results to', myjson_path)
+    print(mydict)
+
+    with open(myjson_path, 'w') as jf:
+        json.dump(mydict, jf, sort_keys=True)
+    # george's revision
 
     if trim_length > 0:
         output_path += '_trim'
-
     print('----------')
     print('Rendering results to {}.'.format(output_path))
     print('----------')
+    #preds is short for predict next is to dig out how to render smpl model
     render_preds(
         output_path=output_path,
         config=config,
@@ -235,8 +270,8 @@ def main(model):
 
 
 if __name__ == '__main__':
+    print("can print")
     config = get_config()
-
     # Set up model:
     model_hmmr = Tester(
         config,

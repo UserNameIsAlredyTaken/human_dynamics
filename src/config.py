@@ -15,7 +15,7 @@ from glob import glob
 from datetime import datetime
 from absl import flags
 import json
-import ipdb
+#import ipdb
 import numpy as np
 
 curr_path = osp.dirname(osp.abspath(__file__))
@@ -39,7 +39,8 @@ flags.DEFINE_string('smpl_model_path', SMPL_MODEL_PATH,
 flags.DEFINE_string('smpl_face_path', SMPL_FACE_PATH,
                     'path to smpl mesh faces (for easy rendering)')
 
-flags.DEFINE_string('load_path', None, 'path to trained model dir')
+# flags.DEFINE_string('load_path', None, 'path to trained model dir')
+flags.DEFINE_string('load_path', "models/hmmr_model.ckpt-1119816", 'path to trained model dir')
 flags.DEFINE_integer('batch_size', 8, 'Size of mini-batch.')
 flags.DEFINE_integer('T', 20, 'Length of sequence.')
 flags.DEFINE_integer('num_kps', 25, 'Number of keypoints.')
