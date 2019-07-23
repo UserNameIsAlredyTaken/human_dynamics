@@ -31,3 +31,4 @@ demo_output/*
 !demo_output/test_video_fxm
 demo_output/test_video_fxm/*
 !demo_output/test_video_fxm/example.gif
+!demo_output/test_video_fxm/demp.gif
