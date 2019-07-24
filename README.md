@@ -1,4 +1,20 @@
-# Learning 3D Human Dynamics from Video
+## Modified by George
+
+ **1. Build on Windows**
+
+you have to make little modification to **AlphaPose** to make it work on Windows, I will show them later.
+
+ **2. Add Unity Support**
+ 
+ I have transfer hmmr result (especially, the SMPL pose) into Unity that can be used in your own games.
+
+Now it only support single frame transfer I will add more features later.
+
+<img src="https://github.com/Zju-George/human_dynamics/raw/master/demo_output/test_video_fxm/example.gif" width="1000" height="500"/>
+
+---
+
+## Original
 
 Angjoo Kanazawa*, Jason Zhang*, Panna Felsen*, Jitendra Malik
 
