@@ -195,19 +195,27 @@ def predict_on_tracks(model, img_dir, poseflow_path, output_path, track_id,
             pickle.dump(preds, f)
     # get the poses
     myposes = preds['poses']
-    mydict = {}
-    for i in range(0, myposes.shape[1]):
-        rotmat = myposes[0][i]
-        rotlist = list(np.reshape(rotmat, (1, -1))[0])
-        rotlist = [float(j) for j in rotlist]
-        dic_index = 'rot_'+"%02d" %i
-        mydict[dic_index] = rotlist
-
+    totaldict = {}
+    totaldict['frame_Count'] = myposes.shape[0]
+    print("There are totally {} frames ".format(myposes.shape[0]))
+    print('----------')
+    for i in range(0, myposes.shape[0]):
+        frame_index = "frame_" + "%04d" %i
+        framedict = {}
+        print('processing frame : {}'.format(frame_index))
+        for j in range(0, myposes.shape[1]):
+            rotmat = myposes[i][j]
+            rotlist = list(np.reshape(rotmat, (1, -1))[0])
+            rotlist = [float(j) for j in rotlist]
+            rot_index = 'rot_'+"%02d" %j
+            framedict[rot_index] = rotlist
+        totaldict[frame_index] = framedict
+        print('----------')
     print('Saving rot results to', myjson_path)
-    print(mydict)
+    print(framedict)
 
     with open(myjson_path, 'w') as jf:
-        json.dump(mydict, jf, sort_keys=True)
+        json.dump(totaldict, jf, sort_keys=True)
     # george's revision
 
     if trim_length > 0:

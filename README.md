@@ -8,9 +8,10 @@ you have to make little modification to **AlphaPose** to make it work on Windows
  
  I have transfer hmmr result (especially, the SMPL pose) into Unity that can be used in your own games.
 
-Now it only support single frame transfer I will add more features later.
+~~Now it only support single frame transfer I will add more features later.~~
+Now we support animations!!
 
-<img src="https://github.com/Zju-George/human_dynamics/raw/master/demo_output/test_video_fxm/example.gif" width="1000" height="500"/>
+<img src="https://github.com/Zju-George/human_dynamics/raw/master/demo_output/test_video_fxm/demo.gif" width="1000" height="500"/>
 
 ---
 
