@@ -2,11 +2,11 @@
 
  **1. Build on Windows**
 
-you have to make little modification to **AlphaPose** to make it work on Windows, ~~I will show them later.~~
+You have to make little modification to **AlphaPose** to make it work on Windows, ~~I will show them later.~~
 
-more specifically, you change all `'/'` in the **AlphaPose** which is the path separator of Linux or mac os to `'\\'` which Windows uses, but more robust way is to change to `'os.sep'` (make sure you import os first).
+More specifically, you change all `'/'` in the **AlphaPose** which is the path separator of Linux or mac os to `'\\'` which Windows uses, but more robust way is to change to `'os.sep'` (make sure you import os first).
 
-here is a screenshot of my fork:
+Here is a screenshot of my fork:
 
 <img src="https://github.com/Zju-George/video2bvh_hmr/raw/master/data/os.sep.png" width="943" height="360"/>
 
