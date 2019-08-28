@@ -169,7 +169,8 @@ def predict_on_tracks(model, img_dir, poseflow_path, output_path, track_id,
     else:
         without = without[0]
     myjson_dir = osp.join(without, 'rot_output')
-    myjson_path = osp.join(myjson_dir, 'rot_output.json')
+    myrot_path = osp.join(myjson_dir, 'rot_output.json')
+    mykps_path = osp.join(myjson_dir, 'kps_output.json')
     mkdir(myjson_dir)
 
     # george's revision
@@ -193,6 +194,22 @@ def predict_on_tracks(model, img_dir, poseflow_path, output_path, track_id,
         with open(pred_path, 'wb') as f:
             print('Saving prediction results to', pred_path)
             pickle.dump(preds, f)
+    # get the kps
+    mykps = preds['kps']
+    totalkpsdict = {}
+    totalkpsdict['frame_Count'] = mykps.shape[0]
+    for i in range(0, mykps.shape[0]):
+        frame_index = "frame_" + "%04d" % i
+        framedict = {}
+        for j in range(0, mykps.shape[1]):
+            _kps = mykps[i][j]
+            kpslist = [float(j) for j in _kps]
+            kps_index = 'kps_' +"%02d" % j
+            framedict[kps_index]=kpslist
+        totalkpsdict[frame_index] = framedict
+    print('Saving kps results to', mykps_path)
+    with open(mykps_path, 'w') as jf:
+        json.dump(totalkpsdict, jf, sort_keys=True)
     # get the poses
     myposes = preds['poses']
     totaldict = {}
@@ -200,21 +217,20 @@ def predict_on_tracks(model, img_dir, poseflow_path, output_path, track_id,
     print("There are totally {} frames ".format(myposes.shape[0]))
     print('----------')
     for i in range(0, myposes.shape[0]):
-        frame_index = "frame_" + "%04d" %i
+        frame_index = "frame_" + "%04d" % i
         framedict = {}
         print('processing frame : {}'.format(frame_index))
         for j in range(0, myposes.shape[1]):
             rotmat = myposes[i][j]
             rotlist = list(np.reshape(rotmat, (1, -1))[0])
             rotlist = [float(j) for j in rotlist]
-            rot_index = 'rot_'+"%02d" %j
+            rot_index = 'rot_'+"%02d" % j
             framedict[rot_index] = rotlist
         totaldict[frame_index] = framedict
         print('----------')
-    print('Saving rot results to', myjson_path)
-    print(framedict)
+    print('Saving rot results to', myrot_path)
 
-    with open(myjson_path, 'w') as jf:
+    with open(myrot_path, 'w') as jf:
         json.dump(totaldict, jf, sort_keys=True)
     # george's revision
 

@@ -220,6 +220,10 @@ class OmegasPred(Omegas):
         self.cams = tf.constant((), shape=(self.batch_size, 0, 3))
         self.all_verts = tf.constant((), shape=(0, 6890, 3))
         self.verts = tf.constant((), shape=(0, 6890, 3))
+        # george modify
+        self.all_trans = tf.constant((), shape=(0, 24, 3))
+        self.transform = tf.constant((), shape=(0, 24, 3))
+
         self.smpl_computed = False
         self.vis_max_batch = vis_max_batch
         self.vis_t_indices = vis_t_indices
@@ -270,11 +274,12 @@ class OmegasPred(Omegas):
         B = self.batch_size
         T = self.length
 
-        verts, joints, poses_rot = self.smpl(
+        verts, joints, poses_rot, transforms = self.smpl(
             beta=tf.reshape(self.shapes, (B * T, 10)),
             theta=tf.reshape(self.poses_aa, (B * T, 24, 3)),
             get_skin=True
         )
+        # print(verts)
         self.joints = tf.reshape(joints, (B, T, self.config.num_kps, 3))
         self.poses_rot = tf.reshape(poses_rot, (B, T, 24, 3, 3))
 
@@ -301,6 +306,16 @@ class OmegasPred(Omegas):
                 values=self.all_verts,
                 indices=self.vis_t_indices
             )
+        # george modify
+        self.all_trans = tf.reshape(transforms, (B, T, 24, 3))[:self.vis_max_batch]
+        if self.vis_t_indices is None:
+            self.transform = self.all_trans
+        else:
+            self.transform = Omegas.gather(
+                values=self.all_trans,
+                indices=self.vis_t_indices
+            )
+
         self.smpl_computed = True
 
     def get_cams(self, t=None):
@@ -327,6 +342,10 @@ class OmegasPred(Omegas):
 
     def get_verts(self):
         return self.verts
+
+    def get_transform(self):
+        return self.transform
+
 
     def get_raw(self):
         """

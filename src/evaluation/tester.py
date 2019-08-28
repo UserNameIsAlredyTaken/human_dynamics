@@ -225,6 +225,7 @@ class Tester(object):
             'shapes' + suffix: omegas.get_shapes(),
             'verts' + suffix: omegas.get_verts(),
             'omegas' + suffix: omegas.get_raw(),
+            'transform' + suffix: omegas.get_transform(),
         }
 
     def predict(self, images):
@@ -296,7 +297,7 @@ class Tester(object):
         images_batched = np.reshape(images_batched, (count, B, T, H, W, 3))
 
         results = {}
-        #results is the full frames results, pred is single frame result
+        # results is the full frames results, pred is single frame result
         for images in tqdm(images_batched):
             pred = self.predict(
                 images,
@@ -305,7 +306,7 @@ class Tester(object):
 
         # Results are now (CxBxTx...). Should be (Nx...).
         new_results = {}
-        #k,v stands for key value
+        # k,v stands for key value
         for k, v in results.items():
             v = np.array(v)[:, :, margin : -margin]
             old_shape = v.shape[3:]
