@@ -49,7 +49,7 @@ flags.DEFINE_list('delta_t_values', ['-5', '5'], 'Amount of time to jump by.')
 
 # For training.
 flags.DEFINE_string('data_dir', None, 'Where tfrecords are saved')
-flags.DEFINE_string('log_dir', 'logs', 'Where to save training models')
+#flags.DEFINE_string('log_dir', 'logs', 'Where to save training models')
 flags.DEFINE_string('model_dir', None,
                     'Where model will be saved -- filled automatically')
 flags.DEFINE_list('datasets', ['h36m', 'penn_action', 'insta_variety'],
@@ -235,7 +235,7 @@ def prepare_dirs(config, prefix=[]):
             postfix.append('lw-pose{:g}'.format(config.e_lw_pose))
         if config.e_lw_hallucinate != 1:
             postfix.append('lw-hall{:g}'.format(config.e_lw_pose))
-            
+
 
         if config.d_lr != 1e-4:
             postfix.append('Dlr{:g}' % config.d_lr)
@@ -327,9 +327,11 @@ def prepare_dirs(config, prefix=[]):
         time_str = datetime.now().strftime("%b%d_%H%M")
 
         save_name = "%s_%s_%s" % (prefix, postfix, time_str)
-        config.model_dir = osp.join(config.log_dir, save_name)
+        config.model_dir = osp.join('logs', save_name)
+        #config.model_dir = osp.join(config.log_dir, save_name)'logs'
 
-    for path in [config.log_dir, config.model_dir]:
+    #for path in [config.log_dir, config.model_dir]:
+    for path in ['logs', config.model_dir]:
         if not osp.exists(path):
             print('making %s' % path)
             makedirs(path)

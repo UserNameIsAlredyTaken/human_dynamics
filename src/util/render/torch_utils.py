@@ -23,8 +23,9 @@ def orthographic_proj_withz_idrot(X, cam, offset_z=0.):
     # proj = scale * X
     proj = X
 
-    proj_xy = scale * (proj[:, :, :2] + trans)
-    proj_z = proj[:, :, 2, None] + offset_z
+    proj_xy = scale * (proj[:, :, :2] + trans) # оригинальный
+    # proj_z = (proj[:, :, 2, None] + offset_z) # оригинальный
+    proj_z = scale * (proj[:, :, 2, None] + offset_z)
 
     return torch.cat((proj_xy, proj_z), 2)
 
@@ -37,6 +38,8 @@ def orthographic_proj_withz(X, cam, offset_z=0.):
     sc * ( x + [tx; ty])
     as in HMR..
     """
+
+
     quat = cam[:, -4:]
     X_rot = quat_rotate(X, quat)
 
@@ -48,6 +51,7 @@ def orthographic_proj_withz(X, cam, offset_z=0.):
 
     proj_xy = scale * (proj[:, :, :2] + trans)
     proj_z = proj[:, :, 2, None] + offset_z
+
 
     return torch.cat((proj_xy, proj_z), 2)
 

@@ -15,11 +15,11 @@ from tqdm import tqdm
 from src.util.render.nmr_renderer import (
     VisRenderer,
     visualize_img,
-    visualize_img_orig,
+    visualize_img_orig
 )
+
 from src.util.common import resize_img
 from src.util.smooth_bbox import get_smooth_bbox_params
-
 
 IMG_SIZE = 224
 
@@ -167,39 +167,39 @@ def render_preds(output_path, config, preds, images, images_orig, trim_length,
         )
 
         # Render in cropped frame
-        skel_crop, rend_crop = visualize_img(
-            img=image,
-            cam=cam,
-            kp_pred=kps,
-            vert=vert,
-            renderer=renderer_crop,
-            mesh_color=config.mesh_color,
-        )
-        h, w, _ = render_og.shape
-        w = w * img_size // h
-        render_og = cv2.resize(render_og, (w, img_size))
-
-        padding = np.ones((img_size, np.abs(w - img_size), 3))
-        rot_og = cv2.resize(rot_og, (img_size, img_size))
-        if w > img_size:
-            rot_og = np.hstack((rot_og, padding))
-        else:
-            render_og = np.hstack((render_og, padding))
-        rendered_crop = np.hstack((
-            np.vstack((rend_crop, skel_crop)),
-            np.vstack((render_og, rot_og))
-        ))
-
-        plt.imsave(
-            fname=os.path.join(output_crop,
-                               'frame{:06d}.png'.format(j - trim_length)),
-            arr=rendered_crop,
-        )
+        # skel_crop, rend_crop = visualize_img(
+        #     img=image,
+        #     cam=cam,
+        #     kp_pred=kps,
+        #     vert=vert,
+        #     renderer=renderer_crop,
+        #     mesh_color=config.mesh_color,
+        # )
+        # h, w, _ = render_og.shape
+        # w = w * img_size // h
+        # render_og = cv2.resize(render_og, (w, img_size))
+        #
+        # padding = np.ones((img_size, np.abs(w - img_size), 3))
+        # rot_og = cv2.resize(rot_og, (img_size, img_size))
+        # if w > img_size:
+        #     rot_og = np.hstack((rot_og, padding))
+        # else:
+        #     render_og = np.hstack((render_og, padding))
+        # rendered_crop = np.hstack((
+        #     np.vstack((rend_crop, skel_crop)),
+        #     np.vstack((render_og, rot_og))
+        # ))
+        #
+        # plt.imsave(
+        #     fname=os.path.join(output_crop,
+        #                        'frame{:06d}.png'.format(j - trim_length)),
+        #     arr=rendered_crop,
+        # )
 
     print('Converting them to video..')
 
     make_video(vid_path, output_path)
-    make_video(vid_path_crop, output_crop)
+    # make_video(vid_path_crop, output_crop)
 
 
 def make_video(output_path, img_dir, fps=25):

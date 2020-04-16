@@ -16,6 +16,7 @@ import pickle
 import re
 import sys
 from glob import glob
+from skimage.io import imread
 
 # import ipdb
 from typing import Union
@@ -61,7 +62,7 @@ flags.DEFINE_boolean(
 )
 
 
-def get_labels_poseflow(json_path, num_frames, min_kp_count=20):
+def get_labels_poseflow(json_path, num_frames, min_kp_count=0):
     """
     Returns the poses for each person tracklet.
 
@@ -128,6 +129,7 @@ def predict_on_tracks(model, img_dir, poseflow_path, output_path, track_id,
                       trim_length):
     # Get all the images
     im_paths = sorted(glob(osp.join(img_dir, '*.png')))
+
     all_kps = get_labels_poseflow(poseflow_path, len(im_paths))
 
     # Here we set which track to use.
@@ -171,6 +173,7 @@ def predict_on_tracks(model, img_dir, poseflow_path, output_path, track_id,
     myjson_dir = osp.join(without, 'rot_output')
     myrot_path = osp.join(myjson_dir, 'rot_output.json')
     mykps_path = osp.join(myjson_dir, 'kps_output.json')
+    mycam_path = osp.join(myjson_dir, 'cam_output.json')
     mkdir(myjson_dir)
 
     # george's revision
@@ -194,6 +197,10 @@ def predict_on_tracks(model, img_dir, poseflow_path, output_path, track_id,
         with open(pred_path, 'wb') as f:
             print('Saving prediction results to', pred_path)
             pickle.dump(preds, f)
+
+    print('Saving cam results to', mycam_path)
+    with open(mycam_path, 'w') as jf:
+        json.dump(preds['cams'].tolist(), jf, sort_keys=True)
     # get the kps
     mykps = preds['kps']
     totalkpsdict = {}
@@ -216,6 +223,7 @@ def predict_on_tracks(model, img_dir, poseflow_path, output_path, track_id,
     totaldict['frame_Count'] = myposes.shape[0]
     print("There are totally {} frames ".format(myposes.shape[0]))
     print('----------')
+    allframes_arr = []
     for i in range(0, myposes.shape[0]):
         frame_index = "frame_" + "%04d" % i
         framedict = {}
@@ -226,8 +234,13 @@ def predict_on_tracks(model, img_dir, poseflow_path, output_path, track_id,
             rotlist = [float(j) for j in rotlist]
             rot_index = 'rot_'+"%02d" % j
             framedict[rot_index] = rotlist
-        totaldict[frame_index] = framedict
+
+        framedict['cam'] = preds['cams'].tolist()[i]
+        allframes_arr.append(framedict)
+
+
         print('----------')
+    totaldict['frames'] = allframes_arr
     print('Saving rot results to', myrot_path)
 
     with open(myrot_path, 'w') as jf:
@@ -240,6 +253,10 @@ def predict_on_tracks(model, img_dir, poseflow_path, output_path, track_id,
     print('Rendering results to {}.'.format(output_path))
     print('----------')
     #preds is short for predict next is to dig out how to render smpl model
+
+    print_cam_params(images_orig, preds)
+
+
     render_preds(
         output_path=output_path,
         config=config,
@@ -248,6 +265,40 @@ def predict_on_tracks(model, img_dir, poseflow_path, output_path, track_id,
         images_orig=images_orig,
         trim_length=trim_length,
     )
+
+
+def print_cam_params(images_orig, preds):
+    scale = images_orig[0]['scale']
+    undo_scale = 1. / np.array(scale)
+    start_pt = images_orig[0]['start_pt']
+    print("START_POINT ", start_pt)
+    proc_img_shape = images_orig[0]['im_shape']
+    print("PROC_IMG_SHAPE ", start_pt)
+
+    shape = images_orig[0]['im_shape']
+    camera = preds['cams'][0]
+    print('IMAGE_SHAPE ', shape)
+    print('CAMERA ', camera)
+    # This is camera in crop image coord.
+    cam_crop = np.hstack([shape[0] * camera[0] * 0.5,
+                          camera[1:] + (2. / camera[0]) * 0.5])
+    print('CAM_CROP ', cam_crop)
+    # This is camera in orig image coord
+    cam_orig = np.hstack([
+        cam_crop[0] * undo_scale,
+        cam_crop[1:] + (start_pt - proc_img_shape[0]) / cam_crop[0]
+    ])
+    print('CAM_ORIG ', cam_orig)
+
+    image_og = imread(images_orig[0]['im_path'])
+    img = ((image_og / 255.) - 0.5) * 2
+    img_size = np.max(img.shape[:2])
+    # This is the camera in normalized orig_image coord
+    new_cam = np.hstack([
+        cam_orig[0] * (2. / img_size),
+        cam_orig[1:] - (1 / ((2. / img_size) * cam_orig[0]))
+    ])
+    print('NEW_CAM ', new_cam)
 
 
 def run_on_video(model, vid_path, trim_length):

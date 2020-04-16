@@ -11,7 +11,7 @@ import neural_renderer as nr
 import numpy as np
 import torch
 from torch.autograd import Variable
-
+import json, codecs
 from skimage.io import imread
 
 from src.util.common import resize_img
@@ -40,6 +40,7 @@ def get_dims(x):
     return x.dim() if isinstance(x, torch.Tensor) else x.ndim
 
 
+
 class VisRenderer(object):
     """
     Utility to render meshes using pytorch NMR
@@ -48,6 +49,7 @@ class VisRenderer(object):
     This class assumes all inputs are Torch/numpy variables.
     This renderer expects quarternion rotation for camera,,
     """
+    all_cams = []
 
     def __init__(self,
                  img_size=256,
@@ -136,8 +138,15 @@ class VisRenderer(object):
         cam = to_variable(cam)
         texture = to_variable(texture)
 
+        list_cams = cam.tolist()
+        self.all_cams.append(list_cams)
+        json.dump(self.all_cams, codecs.open("cams_anim.txt", 'w', encoding='utf-8'), separators=(',', ':'),
+                  sort_keys=True, indent=4)
+
         # set offset_z for persp proj
         proj_verts = self.proj_fn(verts, cam, offset_z=0)
+
+
         # Flipping the y-axis here to make it align with
         # the image coordinate system!
         proj_verts[:, :, 1] *= -1
@@ -172,6 +181,8 @@ class VisRenderer(object):
                 return self.make_alpha(rend, mask)
         else:
             return rend.astype(np.uint8)
+
+
 
     def rotated(self,
                 verts,
@@ -239,6 +250,10 @@ class VisRenderer(object):
     def set_bgcolor(self, color):
         self.renderer.background_color = color
 
+    def to_json(verts):
+        list_verts = verts.tolist()
+        json.dump(list_verts, codecs.open("verts_anim.txt", 'w', encoding='utf-8'), separators=(',', ':'),
+                  sort_keys=True, indent=4)
 
 def to_variable(x):
     if type(x) is not torch.autograd.Variable:
@@ -294,7 +309,7 @@ def visualize_img(img,
         Combined image.
     """
     img_size = img.shape[0]
-    text.update({'sc': cam[0], 'tx': cam[1], 'ty': cam[2]})
+    text.update({'sc': cam[0], 'tx': cam[1], 'ty': cam[2]})#!!!!!!!!!!!!!!!
     if kp_gt is not None:
         gt_vis = kp_gt[:, 2].astype(bool)
         loss = np.sum((kp_gt[gt_vis, :2] - kp_pred[gt_vis])**2)
@@ -432,6 +447,7 @@ def visualize_mesh_og(cam, vert, renderer, start_pt, scale, proc_img_shape,
     crops the image and uses the crop_cam to render.
     (See compute_video_bbox.py)
     """
+
     if img is None:
         img = imread(im_path)
         # Pre-process image to [-1, 1] bc it expects this.
@@ -464,6 +480,7 @@ def visualize_mesh_og(cam, vert, renderer, start_pt, scale, proc_img_shape,
         )
     else:
         # This is camera in crop image coord.
+
         cam_crop = np.hstack([proc_img_shape[0] * cam[0] * 0.5,
                               cam[1:] + (2./cam[0]) * 0.5])
 
@@ -472,7 +489,6 @@ def visualize_mesh_og(cam, vert, renderer, start_pt, scale, proc_img_shape,
             cam_crop[0] * undo_scale,
             cam_crop[1:] + (start_pt - proc_img_shape[0]) / cam_crop[0]
         ])
-
         # This is the camera in normalized orig_image coord
         new_cam = np.hstack([
             cam_orig[0] * (2. / img_size),
